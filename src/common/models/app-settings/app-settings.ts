@@ -24,11 +24,19 @@ import { Customization, CustomizationJS } from "../customization/customization";
 import { DataCube, DataCubeJS } from "../data-cube/data-cube";
 import { Manifest } from "../manifest/manifest";
 
+interface Rollbar {
+  server_token?: string;
+  client_token?: string;
+  report_level?: string;
+  environment?: string;
+}
+
 export interface AppSettingsValue {
   version?: number;
   clusters?: Cluster[];
   customization?: Customization;
   dataCubes?: DataCube[];
+  rollbar?: Rollbar;
 }
 
 export interface AppSettingsJS {
@@ -36,6 +44,7 @@ export interface AppSettingsJS {
   clusters?: ClusterJS[];
   customization?: CustomizationJS;
   dataCubes?: DataCubeJS[];
+  rollbar?: Rollbar;
 }
 
 export interface AppSettingsContext {
@@ -89,7 +98,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       version: parameters.version,
       clusters,
       customization: Customization.fromJS(parameters.customization || {}),
-      dataCubes
+      dataCubes,
+      rollbar: parameters.rollbar
     };
 
     return new AppSettings(value);
@@ -99,13 +109,15 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
   public clusters: Cluster[];
   public customization: Customization;
   public dataCubes: DataCube[];
+  public rollbar: Rollbar;
 
   constructor(parameters: AppSettingsValue) {
     const {
       version,
       clusters,
       customization,
-      dataCubes
+      dataCubes,
+      rollbar
     } = parameters;
 
     for (var dataCube of dataCubes) {
@@ -119,6 +131,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     this.clusters = clusters;
     this.customization = customization;
     this.dataCubes = dataCubes;
+    this.rollbar = rollbar;
   }
 
   public valueOf(): AppSettingsValue {
@@ -126,7 +139,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       version: this.version,
       clusters: this.clusters,
       customization: this.customization,
-      dataCubes: this.dataCubes
+      dataCubes: this.dataCubes,
+      rollbar: this.rollbar
     };
   }
 
@@ -136,6 +150,10 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     js.clusters = this.clusters.map(cluster => cluster.toJS());
     js.customization = this.customization.toJS();
     js.dataCubes = this.dataCubes.map(dataCube => dataCube.toJS());
+    if (this.rollbar) {
+      this.rollbar.server_token = null;
+      js.rollbar = this.rollbar;
+    }
     return js;
   }
 
@@ -152,7 +170,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       this.version === other.version &&
       immutableArraysEqual(this.clusters, other.clusters) &&
       immutableEqual(this.customization, other.customization) &&
-      immutableArraysEqual(this.dataCubes, other.dataCubes);
+      immutableArraysEqual(this.dataCubes, other.dataCubes) &&
+      this.rollbar === other.rollbar; // FIX
   }
 
   public toClientSettings(): AppSettings {

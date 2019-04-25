@@ -17,6 +17,7 @@
 
 import * as nopt from "nopt";
 import * as path from "path";
+import * as Rollbar from 'rollbar';
 import { LOGGER, NULL_LOGGER } from "../common/logger/logger";
 import { AppSettings } from "../common/models/app-settings/app-settings";
 import { Cluster } from "../common/models/cluster/cluster";
@@ -177,7 +178,7 @@ if (numSettingsInputs > 1) {
 
 export const PRINT_CONFIG = Boolean(parsedArgs["print-config"]);
 export const START_SERVER = !PRINT_CONFIG;
-const logger = START_SERVER ? LOGGER : NULL_LOGGER;
+let logger = START_SERVER ? LOGGER : NULL_LOGGER;
 
 // Load server settings
 var serverSettingsFilePath = parsedArgs["config"];
@@ -216,6 +217,19 @@ if (parsedArgs["auth"]) {
 
 export const VERBOSE = Boolean(parsedArgs["verbose"] || serverSettingsJS.verbose);
 export const SERVER_SETTINGS = ServerSettings.fromJS(serverSettingsJS);
+export const ROLLBAR = serverSettingsJS.rollbar || '';
+
+
+if (ROLLBAR && START_SERVER) {
+  const rollbarConfig = {
+    accessToken: ROLLBAR.server_token,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    environment: ROLLBAR.environment,
+    reportLevel: ROLLBAR.report_level
+  };
+  logger = new Rollbar(rollbarConfig);
+}
 
 // --- Auth -------------------------------
 

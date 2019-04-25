@@ -16,6 +16,7 @@
  */
 
 import * as React from "react";
+import { rollbar } from "../../utils/rollbarlog/rollbarlog";
 import { STRINGS } from "../../config/constants";
 import { Message } from "../message/message";
 
@@ -24,6 +25,8 @@ export interface QueryErrorProps {
 }
 
 export const QueryError: React.SFC<QueryErrorProps> = ({ error }) => {
+  if (rollbar) rollbar.error(error);
+
   return <Message
     level="error"
     content={error.message}

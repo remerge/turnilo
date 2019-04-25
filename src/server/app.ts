@@ -18,11 +18,12 @@
 import * as bodyParser from "body-parser";
 import * as compress from "compression";
 import * as express from "express";
+import * as Rollbar from 'rollbar';
 import { Handler, Request, Response, Router } from "express";
 import { hsts } from "helmet";
 import * as path from "path";
 import { LOGGER } from "../common/logger/logger";
-import { AUTH, SERVER_SETTINGS, SETTINGS_MANAGER, VERSION } from "./config";
+import { AUTH, SERVER_SETTINGS, SETTINGS_MANAGER, VERSION, ROLLBAR } from "./config";
 import { errorRouter } from "./routes/error/error";
 import { livenessRouter } from "./routes/liveness/liveness";
 import { mkurlRouter } from "./routes/mkurl/mkurl";
@@ -123,6 +124,19 @@ addRoutes("/", turniloRouter(settingsGetter, VERSION));
 app.use((req: Request, res: Response) => {
   res.redirect("/");
 });
+
+if (ROLLBAR) {
+  const rollbarConfig = {
+    accessToken: ROLLBAR.server_token,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    environment: ROLLBAR.environment,
+    logLevel: 'info' as Rollbar.Level,
+    reportLevel: ROLLBAR.report_level
+  };
+  const rollbar = new Rollbar(rollbarConfig);
+  app.use(rollbar.errorHandler());
+}
 
 app.use((err: any, req: Request, res: Response) => {
   LOGGER.error(`Server Error: ${err.message}`);
