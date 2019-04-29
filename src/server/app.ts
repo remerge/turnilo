@@ -34,6 +34,7 @@ import { readinessRouter } from "./routes/readiness/readiness";
 import { shortenRouter } from "./routes/shorten/shorten";
 import { turniloRouter } from "./routes/turnilo/turnilo";
 import { SettingsGetter } from "./utils/settings-manager/settings-manager";
+import * as metrics from "./utils/prom-metrics/prom-metrics";
 import { errorLayout } from "./views";
 
 let app = express();
@@ -49,6 +50,27 @@ function addRoutes(attach: string, router: Router | Handler): void {
   app.use(attach, router);
   app.use(SERVER_SETTINGS.getServerRoot() + attach, router);
 }
+
+//Add request metrics
+app.use((req: Request, res: Response, done) => {
+  const stopRequestTimer = metrics.requestDuration.startTimer();
+
+  function addRequestMetrics() {
+    const lables = { route: res.req.route.path, method: res.req.method, status: res.statusCode }
+    res.removeListener('finish', addRequestMetrics);
+    res.removeListener('close', addRequestMetrics);
+
+    metrics.totalRequests.inc(lables);
+    stopRequestTimer(lables);
+  }
+
+  res.on('finish', addRequestMetrics);
+  res.on('close', addRequestMetrics);
+  
+  if (done) {
+    done();
+  }
+});
 
 // Add compression
 app.use(compress());
