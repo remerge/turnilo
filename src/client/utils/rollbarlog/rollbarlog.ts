@@ -1,6 +1,10 @@
 import * as Rollbar from "rollbar";
 
-const ROLLBAR = (window as any)["__CONFIG__"].appSettings.rollbar;
+const config = (window as any)["__CONFIG__"];
+let ROLLBAR;
+if (config && config.appSettings) {
+  ROLLBAR = config.appSettings.rollbar;
+}
 
 let export_rollbar: any = null;
 if (ROLLBAR && ROLLBAR.client_token) {
