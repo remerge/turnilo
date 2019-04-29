@@ -19,6 +19,7 @@ import * as bodyParser from "body-parser";
 import * as compress from "compression";
 import * as express from "express";
 import * as Rollbar from 'rollbar';
+import { collectDefaultMetrics, register } from "prom-client";
 import { Handler, Request, Response, Router } from "express";
 import { hsts } from "helmet";
 import * as path from "path";
@@ -109,6 +110,11 @@ addRoutes("/mkurl", mkurlRouter(settingsGetter));
 addRoutes("/shorten", shortenRouter(settingsGetter));
 addRoutes("/error", errorRouter);
 
+app.get('/metrics', (req, res) => {
+	res.set('Content-Type', register.contentType);
+	res.end(register.metrics());
+});
+
 // View routes
 if (SERVER_SETTINGS.getIframe() === "deny") {
   app.use((req: Request, res: Response, next: Function) => {
@@ -146,5 +152,7 @@ app.use((err: any, req: Request, res: Response) => {
   const error = isDev ? err : null;
   res.send(errorLayout({ version: VERSION, title: "Error" }, err.message, error));
 });
+
+collectDefaultMetrics({ timeout: 5000, prefix: "turnilo_" });
 
 export = app;
