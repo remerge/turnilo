@@ -16,8 +16,8 @@
  */
 
 import * as React from "react";
-import { rollbar } from "../../utils/rollbarlog/rollbarlog";
 import { STRINGS } from "../../config/constants";
+import { rollbar } from "../../utils/rollbarlog/rollbarlog";
 import { Message } from "../message/message";
 
 export interface QueryErrorProps {

@@ -18,13 +18,13 @@
 import * as bodyParser from "body-parser";
 import * as compress from "compression";
 import * as express from "express";
-import * as Rollbar from 'rollbar';
-import { collectDefaultMetrics, register } from "prom-client";
 import { Handler, Request, Response, Router } from "express";
 import { hsts } from "helmet";
 import * as path from "path";
+import { collectDefaultMetrics, register } from "prom-client";
+import * as Rollbar from "rollbar";
 import { LOGGER } from "../common/logger/logger";
-import { AUTH, SERVER_SETTINGS, SETTINGS_MANAGER, VERSION, ROLLBAR } from "./config";
+import { AUTH, ROLLBAR, SERVER_SETTINGS, SETTINGS_MANAGER, VERSION } from "./config";
 import { errorRouter } from "./routes/error/error";
 import { livenessRouter } from "./routes/liveness/liveness";
 import { mkurlRouter } from "./routes/mkurl/mkurl";
@@ -33,8 +33,8 @@ import { plywoodRouter } from "./routes/plywood/plywood";
 import { readinessRouter } from "./routes/readiness/readiness";
 import { shortenRouter } from "./routes/shorten/shorten";
 import { turniloRouter } from "./routes/turnilo/turnilo";
-import { SettingsGetter } from "./utils/settings-manager/settings-manager";
 import * as metrics from "./utils/prom-metrics/prom-metrics";
+import { SettingsGetter } from "./utils/settings-manager/settings-manager";
 import { errorLayout } from "./views";
 
 let app = express();
@@ -51,22 +51,22 @@ function addRoutes(attach: string, router: Router | Handler): void {
   app.use(SERVER_SETTINGS.getServerRoot() + attach, router);
 }
 
-//Add request metrics
+// Add request metrics
 app.use((req: Request, res: Response, done) => {
   const stopRequestTimer = metrics.requestDuration.startTimer();
 
   function addRequestMetrics() {
-    const lables = { route: res.req.route.path, method: res.req.method, status: res.statusCode }
-    res.removeListener('finish', addRequestMetrics);
-    res.removeListener('close', addRequestMetrics);
+    const lables = { route: res.req.route.path, method: res.req.method, status: res.statusCode };
+    res.removeListener("finish", addRequestMetrics);
+    res.removeListener("close", addRequestMetrics);
 
     metrics.totalRequests.inc(lables);
     stopRequestTimer(lables);
   }
 
-  res.on('finish', addRequestMetrics);
-  res.on('close', addRequestMetrics);
-  
+  res.on("finish", addRequestMetrics);
+  res.on("close", addRequestMetrics);
+
   if (done) {
     done();
   }
@@ -132,9 +132,9 @@ addRoutes("/mkurl", mkurlRouter(settingsGetter));
 addRoutes("/shorten", shortenRouter(settingsGetter));
 addRoutes("/error", errorRouter);
 
-app.get('/metrics', (req, res) => {
-	res.set('Content-Type', register.contentType);
-	res.end(register.metrics());
+app.get("/metrics", (req, res) => {
+  res.set("Content-Type", register.contentType);
+  res.end(register.metrics());
 });
 
 // View routes
@@ -159,7 +159,7 @@ if (ROLLBAR) {
     captureUncaught: true,
     captureUnhandledRejections: true,
     environment: ROLLBAR.environment,
-    logLevel: 'info' as Rollbar.Level,
+    logLevel: "info" as Rollbar.Level,
     reportLevel: ROLLBAR.report_level
   };
   const rollbar = new Rollbar(rollbarConfig);

@@ -17,7 +17,7 @@
 
 import * as nopt from "nopt";
 import * as path from "path";
-import * as Rollbar from 'rollbar';
+import * as Rollbar from "rollbar";
 import { LOGGER, NULL_LOGGER } from "../common/logger/logger";
 import { AppSettings } from "../common/models/app-settings/app-settings";
 import { Cluster } from "../common/models/cluster/cluster";
@@ -217,8 +217,7 @@ if (parsedArgs["auth"]) {
 
 export const VERBOSE = Boolean(parsedArgs["verbose"] || serverSettingsJS.verbose);
 export const SERVER_SETTINGS = ServerSettings.fromJS(serverSettingsJS);
-export const ROLLBAR = serverSettingsJS.rollbar || '';
-
+export const ROLLBAR = serverSettingsJS.rollbar || "";
 
 if (ROLLBAR && START_SERVER) {
   const rollbarConfig = {
