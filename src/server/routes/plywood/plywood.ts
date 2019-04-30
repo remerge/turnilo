@@ -18,6 +18,7 @@
 import { Timezone } from "chronoshift";
 import { Request, Response, Router } from "express";
 import { Dataset, Expression } from "plywood";
+import { plywoodTimeouts } from "../../utils/prom-metrics/prom-metrics";
 import { SettingsGetter } from "../../utils/settings-manager/settings-manager";
 
 export function plywoodRouter(getSettings: SettingsGetter) {
@@ -91,6 +92,9 @@ export function plywoodRouter(getSettings: SettingsGetter) {
       res.json(reply);
     } catch (error) {
       console.log("error:", error.message);
+      if (error.message === "timeout") {
+        plywoodTimeouts.inc();
+      }
       if (error.hasOwnProperty("stack")) {
         console.log((<any> error).stack);
       }

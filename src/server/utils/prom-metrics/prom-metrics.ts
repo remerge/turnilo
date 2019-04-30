@@ -11,3 +11,8 @@ export const requestDuration = new Histogram({
   help: "Request duration",
   labelNames: ["route", "method", "status"]
 });
+
+export const plywoodTimeouts = new Counter({
+  name: "turnilo_plywood_timeouts",
+  help: "Total number of timeouts from plywood"
+});
