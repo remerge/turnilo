@@ -171,8 +171,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       immutableArraysEqual(this.clusters, other.clusters) &&
       immutableEqual(this.customization, other.customization) &&
       immutableArraysEqual(this.dataCubes, other.dataCubes) &&
-      this.rollbar === other.rollbar; // FIX
-  }
+      this.rollbarEquals(other.rollbar);
+    }
 
   public toClientSettings(): AppSettings {
     var value = this.valueOf();
@@ -263,6 +263,17 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return new AppSettings(value);
   }
 
-}
+  rollbarEquals(other: Rollbar): boolean {
+    if (!this.rollbar && !other) {
+      return true;
+    }
+    if (this.rollbar && !other || !this.rollbar && other) {
+      return false;
+    }
+    return this.rollbar.client_token === other.client_token &&
+    this.rollbar.report_level === other.report_level &&
+    this.rollbar.environment === other.environment;
+  }
+ }
 
 check = AppSettings;
