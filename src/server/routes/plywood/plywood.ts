@@ -92,8 +92,10 @@ export function plywoodRouter(getSettings: SettingsGetter) {
       res.json(reply);
     } catch (error) {
       console.log("error:", error.message);
+      console.log("query:", req.query);
+
       if (error.message === "timeout") {
-        plywoodTimeouts.inc();
+        plywoodTimeouts.inc({ host: req.hostname });
       }
       if (error.hasOwnProperty("stack")) {
         console.log((<any> error).stack);

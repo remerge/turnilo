@@ -56,7 +56,7 @@ app.use((req: Request, res: Response, done) => {
   const stopRequestTimer = metrics.requestDuration.startTimer();
 
   function addRequestMetrics() {
-    const lables = { route: res.req.route.path, method: res.req.method, status: res.statusCode };
+    const lables = { host: req.hostname, route: req.path, method: req.method, status: res.statusCode };
     res.removeListener("finish", addRequestMetrics);
     res.removeListener("close", addRequestMetrics);
 
