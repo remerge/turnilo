@@ -21,12 +21,13 @@ import { Essence } from "../../../common/models/essence/essence";
 import { Measure } from "../../../common/models/measure/measure";
 import { Series } from "../../../common/models/series/series";
 import { Timekeeper } from "../../../common/models/timekeeper/timekeeper";
-import { DatasetLoad, error, isError, isLoaded, isLoading, loaded, loading, VisualizationProps } from "../../../common/models/visualization-props/visualization-props";
+import { DatasetLoad, error, isError, isLoaded, isLoading, isReloadNeeded, loaded, loading, reloadNeeded, VisualizationProps } from "../../../common/models/visualization-props/visualization-props";
 import { debounceWithPromise, noop } from "../../../common/utils/functional/functional";
 import makeQuery from "../../../common/utils/query/visualization-query";
 import { GlobalEventListener } from "../../components/global-event-listener/global-event-listener";
 import { Loader } from "../../components/loader/loader";
 import { QueryError } from "../../components/query-error/query-error";
+import { Reloader } from "../../components/reloader/reloader";
 import { classNames } from "../../utils/dom/dom";
 import { reportError } from "../../utils/error-reporter/error-reporter";
 import "./base-visualization.scss";
@@ -77,10 +78,11 @@ export class BaseVisualization<S extends BaseVisualizationState> extends React.C
 
   componentWillReceiveProps(nextProps: VisualizationProps) {
     if (this.shouldFetchData(nextProps) && this.visualisationNotResized(nextProps)) {
-      const { essence, timekeeper } = nextProps;
-      const hadDataLoaded = isLoaded(this.state.datasetLoad);
-      const essenceChanged = !essence.equals(this.props.essence);
-      this.loadData(essence, timekeeper, hadDataLoaded && essenceChanged);
+      // const { essence, timekeeper } = nextProps;
+      // const hadDataLoaded = isLoaded(this.state.datasetLoad);
+      // const essenceChanged = !essence.equals(this.props.essence);
+      // this.loadData(essence, timekeeper, hadDataLoaded && essenceChanged);
+      if (!isReloadNeeded(this.state.datasetLoad)) this.setState({ datasetLoad: reloadNeeded });
     }
   }
 
@@ -109,12 +111,12 @@ export class BaseVisualization<S extends BaseVisualizationState> extends React.C
     essence.dataCube.executor(makeQuery(essence, timekeeper), { timezone: essence.timezone })
       .then((dataset: Dataset) => {
           // signal out of order requests with null
-          if (!this.wasUsedForLastQuery(essence)) return null;
+          if (!this.wasUsedForLastQuery(essence) || isReloadNeeded(this.state.datasetLoad)) return null;
           return loaded(dataset);
         },
         err => {
           // signal out of order requests with null
-          if (!this.wasUsedForLastQuery(essence)) return null;
+          if (!this.wasUsedForLastQuery(essence) || isReloadNeeded(this.state.datasetLoad)) return null;
           reportError(err);
           return error(err);
         })
@@ -159,6 +161,14 @@ export class BaseVisualization<S extends BaseVisualizationState> extends React.C
     return this.props.stage.equals(nextProps.stage);
   }
 
+  private reloadData = () => {
+    const { datasetLoad } = this.state;
+    if (!isReloadNeeded(datasetLoad)) return;
+
+    const { essence, timekeeper } = this.props;
+    this.loadData(essence, timekeeper, true);
+  }
+
   protected renderInternals(dataset: Dataset): JSX.Element {
     return null;
   }
@@ -178,6 +188,7 @@ export class BaseVisualization<S extends BaseVisualizationState> extends React.C
       {isLoaded(datasetLoad) && this.renderInternals(datasetLoad.dataset)}
       {isError(datasetLoad) && <QueryError error={datasetLoad.error} />}
       {isLoading(datasetLoad) && <Loader />}
+      {isReloadNeeded(datasetLoad) && <Reloader onReload={this.reloadData} />}
     </div>;
   }
 }

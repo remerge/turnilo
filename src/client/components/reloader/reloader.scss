@@ -17,18 +17,17 @@
 
 @import '../../imports';
 
-.base-visualization {
-  @include pin-full;
-  overflow: hidden;
+$reloader-size: 30px;
 
-  .internals {
-    @include pin-full;
-    overflow: auto;
-  }
+.reloader {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 
-  .loader,
-  .message,
-  .reloader {
-    @include pin-full;
+  svg {
+    width: $reloader-size;
+    height: $reloader-size;
   }
 }

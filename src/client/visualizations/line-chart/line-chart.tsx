@@ -16,6 +16,7 @@
  */
 
 import { Duration, Timezone } from "chronoshift";
+import Linear = d3.scale.Linear;
 import * as d3 from "d3";
 import { List } from "immutable";
 import { immutableEqual } from "immutable-class";
@@ -58,7 +59,6 @@ import { SPLIT, VIS_H_PADDING } from "../../config/constants";
 import { escapeKey, getXFromEvent, JSXNode } from "../../utils/dom/dom";
 import { BaseVisualization, BaseVisualizationState } from "../base-visualization/base-visualization";
 import "./line-chart.scss";
-import Linear = d3.scale.Linear;
 
 const TEXT_SPACER = 36;
 const X_AXIS_HEIGHT = 30;

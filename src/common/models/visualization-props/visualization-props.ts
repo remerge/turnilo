@@ -31,7 +31,7 @@ export interface VisualizationProps {
   refreshRequestTimestamp: number;
 }
 
-enum DatasetLoadStatus { LOADED, LOADING, ERROR }
+enum DatasetLoadStatus { LOADED, LOADING, ERROR, RELOAD_NEEDED }
 
 interface DatasetLoadBase {
   status: DatasetLoadStatus;
@@ -51,12 +51,18 @@ interface DatasetLoadError extends DatasetLoadBase {
   error: Error;
 }
 
+interface DatasetReloadNeeded extends DatasetLoadBase {
+ status: DatasetLoadStatus.RELOAD_NEEDED;
+}
+
 export const loading: DatasetLoading = { status: DatasetLoadStatus.LOADING };
 export const error = (error: Error): DatasetLoadError => ({ error, status: DatasetLoadStatus.ERROR });
 export const loaded = (dataset: Dataset): DatasetLoaded => ({ status: DatasetLoadStatus.LOADED, dataset });
+export const reloadNeeded: DatasetReloadNeeded = { status: DatasetLoadStatus.RELOAD_NEEDED };
 
 export const isLoading = (dl: DatasetLoad): dl is DatasetLoading => dl.status === DatasetLoadStatus.LOADING;
 export const isLoaded = (dl: DatasetLoad): dl is DatasetLoaded => dl.status === DatasetLoadStatus.LOADED;
 export const isError = (dl: DatasetLoad): dl is DatasetLoadError => dl.status === DatasetLoadStatus.ERROR;
+export const isReloadNeeded = (dl: DatasetLoad): dl is DatasetLoadError => dl.status === DatasetLoadStatus.RELOAD_NEEDED;
 
-export type DatasetLoad = DatasetLoading | DatasetLoaded | DatasetLoadError;
+export type DatasetLoad = DatasetLoading | DatasetLoaded | DatasetLoadError | DatasetReloadNeeded;
