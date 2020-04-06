@@ -17,7 +17,7 @@
 @import '../../imports';
 
 .delta-negative {
-  color: $negative;
+  @include css-variable(color, negative);
 }
 
 .delta-neutral {

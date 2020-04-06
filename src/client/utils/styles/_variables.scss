@@ -24,7 +24,6 @@ $gray: #ccc;
 $danger: #e24c4c;
 
 $positive: #08b157;
-$negative: #e14040;
 
 // Theme Colors
 
@@ -81,6 +80,7 @@ $theme-colors: (
   item-measure: $item-measure,
   main-time-area: rgba($main-time-line, 0.14),
   main-time-line: $main-time-line,
+  negative: #e14040,
   pinboard-icon: darken($background-base, 5%),
   text-default-color: #444,
   text-light: #999,

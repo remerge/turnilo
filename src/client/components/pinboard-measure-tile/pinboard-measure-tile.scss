@@ -32,7 +32,7 @@
 
   .pinboard-sort-error {
     font-size: 10px;
-    color: $negative;
+    @include css-variable(color, negative);;
     margin-left: 14px;
     margin-top: 8px;
   }
