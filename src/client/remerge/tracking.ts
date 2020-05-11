@@ -53,7 +53,7 @@ interface NumberFilterDetails {
 type FilterDetails = TimeFilterDetails | StringFilterDetails | NumberFilterDetails;
 
 function secondsSince(fromTime: number): number {
-  return Date.now() / 1000 - fromTime
+  return Date.now() / 1000 - fromTime;
 }
 
 function isTimeFilter(filter: any): filter is TimeFilterDetails {
