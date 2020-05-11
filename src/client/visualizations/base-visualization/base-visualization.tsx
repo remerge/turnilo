@@ -27,7 +27,7 @@ import makeQuery from "../../../common/utils/query/visualization-query";
 import { GlobalEventListener } from "../../components/global-event-listener/global-event-listener";
 import { Loader } from "../../components/loader/loader";
 import { QueryError } from "../../components/query-error/query-error";
-import { trackLoadData, trackViewData } from "../../remerge/tracking";
+import { trackErrorData, trackLoadData, trackViewData } from "../../remerge/tracking";
 import { classNames } from "../../utils/dom/dom";
 import { reportError } from "../../utils/error-reporter/error-reporter";
 import "./base-visualization.scss";
@@ -119,6 +119,7 @@ export class BaseVisualization<S extends BaseVisualizationState> extends React.C
           err => {
             // signal out of order requests with null
             if (!this.wasUsedForLastQuery(essence)) return null;
+            trackErrorData(this.className, essence, err.message);
             reportError(err);
             return error(err);
           });
