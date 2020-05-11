@@ -12,6 +12,8 @@ import { reportError } from "../utils/error-reporter/error-reporter";
 import { clientConfig } from "./client-config";
 import { parseIdToken, removeIdToken } from "./id-token";
 
+const DATA_VIEWED_THRESHOLD_IN_SECONDS = 10;
+
 function encodedLocation(): string {
   return encodeURIComponent(window.location.href);
 }
@@ -49,6 +51,10 @@ interface NumberFilterDetails {
 }
 
 type FilterDetails = TimeFilterDetails | StringFilterDetails | NumberFilterDetails;
+
+function secondsSince(fromTime: number): number {
+  return Date.now() / 1000 - fromTime;
+}
 
 function isTimeFilter(filter: any): filter is TimeFilterDetails {
   return filter.dimension === "time";
@@ -164,6 +170,8 @@ function sendLastViewData(onPageUnload = false) {
 
   const { visualization, essence, timeToRender, viewStartAt } = lastViewData;
   lastViewData = undefined;
+  if (secondsSince(viewStartAt) <= DATA_VIEWED_THRESHOLD_IN_SECONDS) return;
+
   sendTrackingEvent({ eventType: "view-data", visualization, essence, viewStartAt, timeToRender, onPageUnload });
 }
 
@@ -182,7 +190,7 @@ function sendTrackingEvent({
 
     track(eventType, {
       time: viewStartAt,
-      $duration: viewStartAt && Date.now() / 1000 - viewStartAt,
+      $duration: viewStartAt && secondsSince(viewStartAt),
       reportDuration: timeFilter,
       timeShift: timeShift.value && timeShift.getDescription(),
       filters: nonTimeFilters.map(filter => filter.dimension),
