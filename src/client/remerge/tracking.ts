@@ -142,14 +142,35 @@ function trackableSplits(essence: Essence): SplitDetail[] {
   }));
 }
 
-let lastViewData: { visualization: string, essence: Essence, timeToRender: number, viewStartAt: number };
+interface LastViewData {
+  visualization: string;
+  essence: Essence;
+  timeToRender: number;
+  viewStartAt: number;
+}
+
+interface TrackingParameters extends Pick<LastViewData, "visualization" | "essence"> {
+  timeToRender?: number;
+  viewStartAt?: number;
+  eventType: "view-data" | "error-data";
+  onPageUnload?: boolean;
+  errorMessage?: string;
+}
+
+let lastViewData: LastViewData;
 
 function sendLastViewData(onPageUnload = false) {
+  if (!lastViewData) return;
+
+  const { visualization, essence, timeToRender, viewStartAt } = lastViewData;
+  lastViewData = undefined;
+  sendTrackingEvent({ eventType: "view-data", visualization, essence, viewStartAt, timeToRender, onPageUnload });
+}
+
+function sendTrackingEvent({
+  eventType, visualization, essence, viewStartAt, timeToRender, onPageUnload = false, errorMessage
+}: TrackingParameters) {
   try {
-    if (!lastViewData) return;
-
-    const { visualization, essence, timeToRender, viewStartAt } = lastViewData;
-
     const splits = trackableSplits(essence);
     const kpis = Array.from(essence.series.series.map(measure => measureLabel(measure.reference, essence)));
     const filters = trackableFilters(essence);
@@ -159,9 +180,9 @@ function sendLastViewData(onPageUnload = false) {
 
     const timeShift = essence.timeShift;
 
-    track("view-data", {
+    track(eventType, {
       time: viewStartAt,
-      $duration: Date.now() / 1000 - viewStartAt,
+      $duration: viewStartAt && Date.now() / 1000 - viewStartAt,
       reportDuration: timeFilter,
       timeShift: timeShift.value && timeShift.getDescription(),
       filters: nonTimeFilters.map(filter => filter.dimension),
@@ -171,13 +192,12 @@ function sendLastViewData(onPageUnload = false) {
       kpis,
       visualization,
       timeToRender,
-      timezone: essence.timezone.toString()
+      timezone: essence.timezone.toString(),
+      errorMessage
     }, onPageUnload);
 
   } catch (error) {
     reportError(error);
-  } finally {
-    lastViewData = undefined;
   }
 }
 
@@ -194,6 +214,12 @@ export function trackViewData(visualization: string, essence: Essence, timeToRen
     timeToRender,
     viewStartAt: Date.now() / 1000
   };
+}
+
+export function trackErrorData(visualization: string, essence: Essence, errorMessage: string) {
+  sendLastViewData();
+
+  sendTrackingEvent({ eventType: "error-data", visualization, essence, errorMessage });
 }
 
 export function init() {
