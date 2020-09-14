@@ -12,6 +12,8 @@ export interface IdTokenUser {
   name: string;
   organizations: number[];
   admin: boolean;
+  employee_type?: string;
+  employee_region?: string;
 }
 
 export interface IdToken {
