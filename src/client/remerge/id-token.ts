@@ -6,15 +6,22 @@ import * as Cookie from "js-cookie";
 
 const ID_TOKEN_COOKIE_NAME = "id_token";
 
-export interface IdTokenUser {
+interface IdTokenUserAdminAttributes {
+  admin: true;
+  name: string;
+  employee_type: string;
+  employee_region: string;
+}
+
+interface IdTokenUserClientAttributes {
+  admin: false;
+}
+
+type IdTokenUser = {
   id: number;
   email: string;
-  name: string;
   organizations: number[];
-  admin: boolean;
-  employee_type?: string;
-  employee_region?: string;
-}
+} & (IdTokenUserAdminAttributes | IdTokenUserClientAttributes);
 
 export interface IdToken {
   exp: number;
