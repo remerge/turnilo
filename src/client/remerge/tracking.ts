@@ -196,9 +196,9 @@ function sendTrackingEvent({
         $duration: viewStartAt && secondsSince(viewStartAt),
         reportDuration: timeFilter,
         timeShift: timeShift.value && timeShift.getDescription(),
-        filters: nonTimeFilters.map((filter) => filter.dimension),
+        filters: nonTimeFilters.map(filter => filter.dimension),
         filterDetails: nonTimeFilters,
-        splits: splits.map((split) => split.dimension),
+        splits: splits.map(split => split.dimension),
         splitsDetails: splits,
         kpis,
         visualization,
@@ -209,9 +209,9 @@ function sendTrackingEvent({
           ? {
             name: idToken.user.name,
             employee_type: idToken.user.employee_type || "unknown",
-            employee_region: idToken.user.employee_region || "unknown",
+            employee_region: idToken.user.employee_region || "unknown"
           }
-          : { name: null, employee_type: null, employee_region: null }),
+          : { name: null, employee_type: null, employee_region: null })
       },
       onPageUnload
     );
