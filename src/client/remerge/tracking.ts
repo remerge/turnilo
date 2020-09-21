@@ -124,7 +124,7 @@ interface SplitDetail {
 function trackableSplits(essence: Essence): SplitDetail[] {
   const { dataCube } = essence;
 
-  return Array.from (essence.splits.splits.map(split => {
+  return Array.from(essence.splits.splits.map(split => {
     const dimension = dataCube.getDimension(split.reference);
 
     const splitDetail: SplitDetail = { dimension: dimension.title };
@@ -187,22 +187,34 @@ function sendTrackingEvent({
     const nonTimeFilters = filters.filter(filter => !isTimeFilter(filter));
 
     const timeShift = essence.timeShift;
+    const idToken = parseIdToken();
 
-    track(eventType, {
-      time: viewStartAt,
-      $duration: viewStartAt && secondsSince(viewStartAt),
-      reportDuration: timeFilter,
-      timeShift: timeShift.value && timeShift.getDescription(),
-      filters: nonTimeFilters.map(filter => filter.dimension),
-      filterDetails: nonTimeFilters,
-      splits: splits.map(split => split.dimension),
-      splitsDetails: splits,
-      kpis,
-      visualization,
-      timeToRender,
-      timezone: essence.timezone.toString(),
-      errorMessage
-    }, onPageUnload);
+    track(
+      eventType,
+      {
+        time: viewStartAt,
+        $duration: viewStartAt && secondsSince(viewStartAt),
+        reportDuration: timeFilter,
+        timeShift: timeShift.value && timeShift.getDescription(),
+        filters: nonTimeFilters.map(filter => filter.dimension),
+        filterDetails: nonTimeFilters,
+        splits: splits.map(split => split.dimension),
+        splitsDetails: splits,
+        kpis,
+        visualization,
+        timeToRender,
+        timezone: essence.timezone.toString(),
+        errorMessage,
+        ...(idToken && idToken.user.admin
+          ? {
+            name: idToken.user.name,
+            employee_type: idToken.user.employee_type || "unknown",
+            employee_region: idToken.user.employee_region || "unknown"
+          }
+          : { name: null, employee_type: null, employee_region: null })
+      },
+      onPageUnload
+    );
 
   } catch (error) {
     reportError(error);
