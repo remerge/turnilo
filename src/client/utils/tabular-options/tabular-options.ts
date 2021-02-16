@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import { Timezone } from "chronoshift";
 import { List } from "immutable";
 import { AttributeInfo, TabulatorOptions, TimeRange } from "plywood";
 import { Essence } from "../../../common/models/essence/essence";
 import { ConcreteSeries, SeriesDerivation } from "../../../common/models/series/concrete-series";
+import { formatISODate } from "../../../common/utils/time/time";
 
 function findSeries(name: string, concreteSeriesList: List<ConcreteSeries>): { series: ConcreteSeries, derivation: SeriesDerivation } {
   for (const derivation of [SeriesDerivation.CURRENT, SeriesDerivation.PREVIOUS, SeriesDerivation.DELTA]) {
@@ -32,7 +34,7 @@ function findSeries(name: string, concreteSeriesList: List<ConcreteSeries>): { s
 export default function tabularOptions(essence: Essence): TabulatorOptions {
   return {
     formatter: {
-      TIME_RANGE: (range: TimeRange) => range.start.toISOString()
+      TIME_RANGE: (range: TimeRange, timezone: Timezone) => formatISODate(range.start, timezone)
     },
     attributeTitle: ({ name }: AttributeInfo) => {
       const { series, derivation } = findSeries(name, essence.getConcreteSeries());
