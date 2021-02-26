@@ -1,3 +1,5 @@
+Please take a look at the [REMERGE.md](./REMERGE.md) for Remerge specific documentation
+
 # Turnilo
 
 [![npm version](https://img.shields.io/npm/v/turnilo.svg)](https://www.npmjs.org/package/turnilo)
@@ -89,17 +91,13 @@ Build the project.
 npm run build:dev
 ```
 
-Copy `chef.new/cookbooks/turnilo/templates/config.yaml` to this repo. Change its `clusters: host` entry to `broker1.dw1.remerge.io:8082`
-
-```
-npm run start:dev -- --config config.yaml
-```
-
 Connect to the existing Druid broker.
 
 ```
 npm run start:dev -- --druid http[s]://druid-broker-hostname[:port]
 ```
+
+To test with Remerge production data locally see [REMERGE.md](./REMERGE.md#setu)
 
 ### Testing
 
